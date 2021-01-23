@@ -13,25 +13,32 @@ const displayName = caps => {
     return caps.charAt(0) + caps.substring(1).toLowerCase()
 }
 
+const msToReadableTime = time => {
+    const second = 1000;
+    const minute = second * 60;
+    const hour = minute * 60;
+
+    let hours = Math.floor(time / hour % 24);
+    let minutes = Math.floor(time / minute % 60);
+    let seconds = Math.floor(time / second % 60);
+
+    return (hours ? hours + 'hr' : '') + minutes + "m" + seconds + 's';
+}
+
 import {useState, useEffect} from 'react'
 
 function Home({ data }) {
     const timer = useNewTimer(new Date());
+    const selectedBody = data[BODIES.indexOf('EARTH')];
     return (
         <div>
+            <h1>The time on {displayName(selectedBody.name)} is {timer.toLocaleString()}</h1>
+            <h2>It is currently:</h2>
             <ul>
-                {data.map((body) => (
-                    <li>
-                        Body: {displayName(body.name)} is in orbital position {body.index + 1}
-                        <ul>
-                            {body.entries.map((entry) => (
-                                <li>Delay to {displayName(entry.body)} is {entry.delay} ms</li>
-                            ))}
-                        </ul>
-                    </li>
+                {selectedBody.entries.map(entry => (
+                    <li>{new Date(timer.getTime() - entry.delay).toLocaleString()} on {displayName(entry.body)} ({msToReadableTime(entry.delay)} behind)</li>
                 ))}
             </ul>
-            <h2>It is {timer.toLocaleTimeString()}</h2>
         </div>
     )
 }
@@ -40,7 +47,7 @@ function useNewTimer(currentDate) {
     const [date, setDate] = useState(currentDate);
 
     useEffect(() => {
-        var timerID = setInterval( () => tick(), 1000 );
+        let timerID = setInterval( () => tick(), 1000 );
         return function cleanup() {
             clearInterval(timerID);
         };
