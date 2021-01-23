@@ -20,6 +20,8 @@
   },
   "homepage": "https://ahappypie.github.io/sol-system-clock",
   "dependencies": {
+    "@grpc/grpc-js": "^1.2.4",
+    "@grpc/proto-loader": "^0.5.6",
     "next": "^10.0.5",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
