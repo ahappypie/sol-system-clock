@@ -7,6 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "container": "docker run -d -p 50050:50050 --name light-delay quay.io/ahappypie/light-delay:0.1.0",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build-gh-pages": "next build && next export -o ./docs && touch ./docs/.nojekyll"
   },
@@ -23,8 +24,11 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.2.4",
     "@grpc/proto-loader": "^0.5.6",
+    "autoprefixer": "^10.2.3",
     "next": "^10.0.5",
+    "postcss": "^8.2.4",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "tailwindcss": "^2.0.2"
   }
 }

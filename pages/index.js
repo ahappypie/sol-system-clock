@@ -9,36 +9,23 @@ const BODIES = [
     'NEPTUNE'
 ]
 
-const displayName = caps => {
-    return caps.charAt(0) + caps.substring(1).toLowerCase()
-}
-
-const msToReadableTime = time => {
-    const second = 1000;
-    const minute = second * 60;
-    const hour = minute * 60;
-
-    let hours = Math.floor(time / hour % 24);
-    let minutes = Math.floor(time / minute % 60);
-    let seconds = Math.floor(time / second % 60);
-
-    return (hours ? hours + 'hr' : '') + minutes + "m" + seconds + 's';
-}
-
 import {useState, useEffect} from 'react'
+import Body from '../components/Body'
+import {displayName} from "../components/util";
 
-function Home({ data }) {
+function Home({ data, timestamp }) {
+    const [delayData, setData] = useState(data)
+    const [lastUpdated, setLastUpdated] = useState(timestamp)
     const timer = useNewTimer(new Date());
-    const selectedBody = data[BODIES.indexOf('EARTH')];
+    const selectedBody = delayData[BODIES.indexOf('EARTH')];
     return (
         <div>
-            <h1>The time on {displayName(selectedBody.name)} is {timer.toLocaleString()}</h1>
-            <h2>It is currently:</h2>
-            <ul>
+            <div>
                 {selectedBody.entries.map(entry => (
-                    <li>{new Date(timer.getTime() - entry.delay).toLocaleString()} on {displayName(entry.body)} ({msToReadableTime(entry.delay)} behind)</li>
+                    <Body key={entry.body} entry={entry} timer={timer}/>
                 ))}
-            </ul>
+            </div>
+            <footer className="pt-6 text-center text-xs">Last Updated {new Date(lastUpdated).toLocaleString()}</footer>
         </div>
     )
 }
@@ -74,13 +61,17 @@ export async function getStaticProps() {
         });
     const descriptor = grpc.loadPackageDefinition(pkgDef);
 
-    const client = new descriptor.LightDelay('localhost:50051', grpc.credentials.createInsecure());
+    const client = new descriptor.LightDelay('localhost:50050', grpc.credentials.createInsecure());
 
     const requests = [];
     BODIES.forEach(body => {
         const req = new Promise((resolve, reject) => {
             client.getAllDelay({timestamp: timestamp, origin: body}, (err, response) => {
                 if (!err) {
+                    response.entries.push({body: body, delay: 0})
+                    response.entries.sort((a, b) => {
+                        return BODIES.indexOf(a.body) - BODIES.indexOf(b.body)
+                    })
                     resolve({id: body, index: BODIES.indexOf(body), name: displayName(body), entries: response.entries})
                 } else {
                     reject(err);
@@ -94,7 +85,8 @@ export async function getStaticProps() {
 
     return {
         props: {
-            data
+            data,
+            timestamp
         },
     }
 }
